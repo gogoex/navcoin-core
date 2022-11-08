@@ -34,11 +34,11 @@ std::map<TokenId, bls::G1Element> BulletproofsRangeproof::H;
 // Calculate base point
 static bls::G1Element GetBaseG1Element(const bls::G1Element &base, size_t idx, std::string tokId = "", uint64_t tokNftId = -1)
 {
-    printf("Creating BaseG1Element w/ idx=%ld...\n", idx);
+    // printf("Creating BaseG1Element w/ idx=%ld...\n", idx);
     auto e = BulletproofsRangeproof::G + BulletproofsRangeproof::G;
 
     for (size_t i=0; i<idx; ++i) {
-        printf("adding G to e... idx=%ld\n", i);
+        // printf("adding G to e... idx=%ld\n", i);
         e = e + BulletproofsRangeproof::G;
     }
 

@@ -113,6 +113,9 @@ BOOST_AUTO_TEST_CASE(RangeProofTest)
 
     bls::G1Element nonce = bls::G1Element::Generator();
 
+    auto buf = nonce.Serialize();
+    printf("G: %s\n", HexStr(buf).c_str());
+
     Scalar one;
     one = 1;
     vs.push_back(one);
