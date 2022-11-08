@@ -106,51 +106,23 @@ bool TestRangeBatch(std::vector<Scalar> values, bls::G1Element nonce)
     return true;
 }
 
+// make -j32 && ./src/test/test_navcoin --run_test=bullet*
 BOOST_AUTO_TEST_CASE(RangeProofTest)
 {
-    std::vector<Scalar> vInRange;
-    std::vector<Scalar> vOutOfRange;
+    std::vector<Scalar> vs;
 
-    bls::G1Element nonce = bls::G1Element::Infinity();
+    bls::G1Element nonce = bls::G1Element::Generator();
 
-    // Admited range is (0, 2**64)
     Scalar one;
     one = 1;
-    Scalar two;
-    two = 2;
-    Scalar twoPow64;
-    twoPow64.SetPow2(64);
-    Scalar bnLowerBound = 0;
-    Scalar bnUpperBound = twoPow64-one;
+    vs.push_back(one);
 
-    vInRange.push_back(bnLowerBound);
-    vInRange.push_back(bnLowerBound+one);
-    vInRange.push_back(bnUpperBound-one);
-    vInRange.push_back(bnUpperBound);
-    vOutOfRange.push_back(bnUpperBound+one);
-    vOutOfRange.push_back(bnUpperBound+one+one);
-    vOutOfRange.push_back(bnUpperBound*two);
-    vOutOfRange.push_back(one.Negate());
-
-    for (Scalar v: vInRange)
-    {
+    for (Scalar v: vs) {
         std::vector<Scalar> values;
         bn_print(v.bn);
         values.push_back(v);
         BOOST_CHECK(TestRange(values, nonce));
     }
-
-    for (Scalar v: vOutOfRange)
-    {
-        std::vector<Scalar> values;
-        values.push_back(v);
-        BOOST_CHECK(!TestRange(values, nonce));
-    }
-
-    BOOST_CHECK(TestRangeBatch(vInRange, nonce));
-    BOOST_CHECK(TestRange(vInRange, nonce));
-    BOOST_CHECK(!TestRangeBatch(vOutOfRange, nonce));
-    BOOST_CHECK(!TestRange(vOutOfRange, nonce));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

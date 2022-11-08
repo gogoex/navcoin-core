@@ -34,32 +34,40 @@ std::map<TokenId, bls::G1Element> BulletproofsRangeproof::H;
 // Calculate base point
 static bls::G1Element GetBaseG1Element(const bls::G1Element &base, size_t idx, std::string tokId = "", uint64_t tokNftId = -1)
 {
-    static const std::string salt("bulletproof");
-    std::vector<uint8_t> data =  base.Serialize();
-    std::string toHash = HexStr(data) + salt + std::to_string(idx) + tokId + (tokNftId != -1 ? "nft"+ std::to_string(tokNftId) : "");
+    printf("Creating BaseG1Element w/ idx=%ld...\n", idx);
+    auto e = BulletproofsRangeproof::G + BulletproofsRangeproof::G;
 
-    CHashWriter ss(SER_GETHASH, 0);
-    ss << toHash;
-    uint256 hash = ss.GetHash();
-
-    uint8_t dest[1];
-    dest[0] = 0x0;
-
-    std::vector<unsigned char> vMcl(48);
-
-    if (tokId != "")
-    {
-        Fp p;
-        auto vHash = std::vector<unsigned char>(hash.begin(), hash.end());
-        p.setLittleEndianMod(&vHash[0], 32);
-        G1 g;
-        mapToG1(g, p);
-        g.serialize(&vMcl[0], 48);
+    for (size_t i=0; i<idx; ++i) {
+        printf("adding G to e... idx=%ld\n", i);
+        e = e + BulletproofsRangeproof::G;
     }
 
-    bls::G1Element e = tokId == "" ? bls::G1Element::FromMessage(std::vector<unsigned char>(hash.begin(), hash.end()), dest, 1) : bls::G1Element::FromByteVector(vMcl);
+    // static const std::string salt("bulletproof");
+    // std::vector<uint8_t> data =  base.Serialize();
+    // std::string toHash = HexStr(data) + salt + std::to_string(idx) + tokId + (tokNftId != -1 ? "nft"+ std::to_string(tokNftId) : "");
 
-    CHECK_AND_ASSERT_THROW_MES(e != bls::G1Element::Infinity(), "Exponent is point at infinity");
+    // CHashWriter ss(SER_GETHASH, 0);
+    // ss << toHash;
+    // uint256 hash = ss.GetHash();
+
+    // uint8_t dest[1];
+    // dest[0] = 0x0;
+
+    // std::vector<unsigned char> vMcl(48);
+
+    // if (tokId != "")
+    // {
+    //     Fp p;
+    //     auto vHash = std::vector<unsigned char>(hash.begin(), hash.end());
+    //     p.setLittleEndianMod(&vHash[0], 32);
+    //     G1 g;
+    //     mapToG1(g, p);
+    //     g.serialize(&vMcl[0], 48);
+    // }
+
+    // bls::G1Element e = tokId == "" ? bls::G1Element::FromMessage(std::vector<unsigned char>(hash.begin(), hash.end()), dest, 1) : bls::G1Element::FromByteVector(vMcl);
+
+    // CHECK_AND_ASSERT_THROW_MES(e != bls::G1Element::Infinity(), "Exponent is point at infinity");
 
     return e;
 }

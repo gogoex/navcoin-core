@@ -279,13 +279,15 @@ bool Scalar::GetBit(size_t n) const
 
 Scalar Scalar::Rand()
 {
-    bn_t ord;
-    bn_new(ord);
-    g1_get_ord(ord);
-    bn_t ret;
-    bn_rand_mod(ret, ord);
-    Scalar r;
-    r = ret;
+    static uint64_t seed = 100000;
+    // bn_t ord;
+    // bn_new(ord);
+    // g1_get_ord(ord);
+    // bn_t ret;
+    // bn_rand_mod(ret, ord);
+    Scalar r(seed);
+    ++seed;
+    //r = ret;
     return r;
 }
 
