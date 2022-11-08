@@ -12,73 +12,43 @@
 
 BOOST_FIXTURE_TEST_SUITE(bulletproofsrangeproof, BasicTestingSetup)
 
-bool TestRange(std::vector<Scalar> values, bls::G1Element nonce)
+void PrintG1(const char* name, bls::G1Element& p)
 {
-    std::vector<Scalar> gamma;
-    std::vector<bls::G1Element> nonces;
-
-    for (unsigned int i = 0; i < values.size(); i++)
-    {
-        gamma.push_back(HashG1Element(nonce, 100+i));
-        nonces.push_back(nonce);
-    }
-
-    BulletproofsRangeproof bprp;
-    bprp.Prove(values, nonce, {1, 2, 3, 4});
-
-    std::vector<std::pair<int, BulletproofsRangeproof>> proofs;
-    proofs.push_back(std::make_pair(0,bprp));
-
-    std::vector<RangeproofEncodedData> data;
-
-    bool ret = VerifyBulletproof(proofs, data, nonces);
-
-    if (!ret)
-        return ret;
-
-    if (values.size() == 1)
-    {
-        for (unsigned int i = 0; i < values.size(); i++)
-        {
-            if(data[i].amount != values[i].GetInt64())
-                return false;
-            if(!(data[i].gamma == gamma[i]))
-                return false;
-            if(data[i].message[0] != 1)
-                return false;
-            if(data[i].message[1] != 2)
-                return false;
-            if(data[i].message[2] != 3)
-                return false;
-            if(data[i].message[3] != 4)
-                return false;
-        }
-    }
-
-    return true;
+    printf("%s: %s\n", name, HexStr(p.Serialize()).c_str());
 }
 
-bool TestRangeBatch(std::vector<Scalar> values, bls::G1Element nonce)
+void PrintScalar(const char* name, Scalar& s)
 {
-    std::vector<std::pair<int, BulletproofsRangeproof>> proofs;
+    printf("%s: %s\n", name, HexStr(s.GetVch()).c_str());
+}
+
+bool TestRange(std::vector<Scalar> values, bls::G1Element nonce)
+{
+    std::vector<Scalar> gammas;
     std::vector<bls::G1Element> nonces;
 
-    std::vector<Scalar> gammas;
-    Scalar gamma = HashG1Element(nonce, 100);
+    auto gamma = HashG1Element(nonce, 100);
     gammas.push_back(gamma);
-
-    std::vector<Scalar> vs;
-    vs.push_back(values[0]);
+    nonces.push_back(nonce);
 
     BulletproofsRangeproof rp;
-    rp.Prove(vs, nonce, {1,2,3,4});
+    rp.Prove(values, nonce, {1, 2, 3, 4});
 
-    nonces.push_back(nonce);
+    PrintG1("A", rp.A);
+    PrintG1("S", rp.S);
+    PrintG1("T1", rp.T1);
+    PrintG1("T2", rp.T1);
+    PrintScalar("tau_x", rp.taux);
+    PrintScalar("mu", rp.mu);
+    PrintScalar("a", rp.a);
+    PrintScalar("b", rp.b);
+    PrintScalar("t_hat", rp.t);
+
+    std::vector<std::pair<int, BulletproofsRangeproof>> proofs;
     proofs.push_back(std::make_pair(0, rp));
 
     std::vector<RangeproofEncodedData> data;
     bool ret = VerifyBulletproof(proofs, data, nonces);
-
     if (!ret)
         return ret;
 
