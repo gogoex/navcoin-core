@@ -62,47 +62,32 @@ bool TestRangeBatch(std::vector<Scalar> values, bls::G1Element nonce)
 {
     std::vector<std::pair<int, BulletproofsRangeproof>> proofs;
     std::vector<bls::G1Element> nonces;
-    std::vector<Scalar> gamma;
-    Scalar mask = HashG1Element(nonce, 100);
 
-    for (unsigned int i = 0; i < values.size(); i++)
-    {
-        std::vector<Scalar> v;
-        v.push_back(values[i]);
+    std::vector<Scalar> gammas;
+    Scalar gamma = HashG1Element(nonce, 100);
+    gammas.push_back(gamma);
 
-        gamma.push_back(mask);
+    std::vector<Scalar> vs;
+    vs.push_back(values[0]);
 
-        BulletproofsRangeproof bprp;
-        bprp.Prove(v, nonce, {1,2,3,4});
+    BulletproofsRangeproof rp;
+    rp.Prove(vs, nonce, {1,2,3,4});
 
-        nonces.push_back(nonce);
-
-        proofs.push_back(std::make_pair(i, bprp));
-    }
+    nonces.push_back(nonce);
+    proofs.push_back(std::make_pair(0, rp));
 
     std::vector<RangeproofEncodedData> data;
-
     bool ret = VerifyBulletproof(proofs, data, nonces);
 
     if (!ret)
         return ret;
 
-    for (unsigned int i = 0; i < values.size(); i++)
-    {
-        if(data[i].amount != values[i].GetInt64())
-            return false;
-        if(!(data[i].gamma == gamma[i]))
-            return false;
-        if(data[i].message[0] != 1)
-            return false;
-        if(data[i].message[1] != 2)
-            return false;
-        if(data[i].message[2] != 3)
-            return false;
-        if(data[i].message[3] != 4)
-            return false;
-    }
-
+    if (data[0].amount != values[0].GetInt64()) return false;
+    if (!(data[0].gamma == gammas[0])) return false;
+    if (data[0].message[0] != 1) return false;
+    if (data[0].message[1] != 2) return false;
+    if (data[0].message[2] != 3) return false;
+    if (data[0].message[3] != 4) return false;
     return true;
 }
 
